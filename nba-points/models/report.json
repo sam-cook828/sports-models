@@ -1,0 +1,47 @@
+{
+  "points": {
+    "expected_points": {
+      "n_train": 182602,
+      "n_test": 47306,
+      "best_iter": 195,
+      "calibration": {
+        "tree_weight": 1.016,
+        "avg_weight": -0.002,
+        "intercept": -0.12
+      },
+      "baseline_rmse": 6.43,
+      "baseline_mae": 4.96,
+      "uncalibrated": {
+        "test_rmse": 6.2,
+        "test_mae": 4.79,
+        "mean_bias": -0.05,
+        "top2pct_bias": 0.12
+      },
+      "test_rmse": 6.2,
+      "test_mae": 4.79,
+      "mean_bias": -0.01,
+      "top2pct_bias": 0.36,
+      "confidence": {
+        "High": {
+          "n": 15904,
+          "share": 0.336,
+          "mae": 5.83,
+          "relative_miss": 0.322
+        },
+        "Medium": {
+          "n": 15866,
+          "share": 0.335,
+          "mae": 4.37,
+          "relative_miss": 0.448
+        },
+        "Low": {
+          "n": 15536,
+          "share": 0.328,
+          "mae": 4.17,
+          "relative_miss": 0.572
+        }
+      },
+      "rmse_improvement_pct": 3.6
+    }
+  }
+}

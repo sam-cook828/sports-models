@@ -50,6 +50,10 @@ def load_box(start: int = FIRST_SEASON, end: int | None = None, refresh_current:
               if (f := _cached(BOX_URL.format(season=s), f"box_{s}", refresh_current and s == end, BOX_COLS)) is not None]
     df = pd.concat(frames, ignore_index=True)
     df = df[(df["season_type"] == REGULAR_SEASON) & ~df["did_not_play"].fillna(False) & (df["minutes"].fillna(0) > 0)]
+    # All-Star and exhibition sides (EAST, WEST, ...) are listed as regular season; real teams play 20+ games
+    team_games = df.groupby(["season", "team_abbreviation"])["game_id"].transform("nunique")
+    current = df["season"] == df["season"].max()  # early in a season every team has only a few games
+    df = df[(team_games >= 20) | (current & ~df["team_abbreviation"].isin(["EAST", "WEST"]))]
     df["game_date"] = pd.to_datetime(df["game_date"])
     df["home"] = (df["home_away"] == "home").astype(float)
     df["starter"] = df["starter"].astype(float)

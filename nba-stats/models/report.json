@@ -1,0 +1,137 @@
+{
+  "points": {
+    "expected": {
+      "n_train": 182354,
+      "n_test": 47202,
+      "best_iter": 404,
+      "calibration": {
+        "tree_weight": 1.024,
+        "avg_weight": -0.006,
+        "intercept": -0.35
+      },
+      "baseline_rmse": 6.36,
+      "baseline_mae": 4.92,
+      "uncalibrated": {
+        "test_rmse": 6.06,
+        "test_mae": 4.7,
+        "mean_bias": 0.18,
+        "top2pct_bias": 0.2
+      },
+      "test_rmse": 6.06,
+      "test_mae": 4.69,
+      "mean_bias": 0.04,
+      "top2pct_bias": 0.34,
+      "confidence": {
+        "High": {
+          "n": 15932,
+          "share": 0.338,
+          "mae": 5.62,
+          "relative_miss": 0.312
+        },
+        "Medium": {
+          "n": 16063,
+          "share": 0.34,
+          "mae": 4.4,
+          "relative_miss": 0.437
+        },
+        "Low": {
+          "n": 15207,
+          "share": 0.322,
+          "mae": 4.01,
+          "relative_miss": 0.553
+        }
+      },
+      "rmse_improvement_pct": 4.7
+    }
+  },
+  "assists": {
+    "expected": {
+      "n_train": 182354,
+      "n_test": 47202,
+      "best_iter": 372,
+      "calibration": {
+        "tree_weight": 1.02,
+        "avg_weight": -0.021,
+        "intercept": -0.06
+      },
+      "baseline_rmse": 1.94,
+      "baseline_mae": 1.45,
+      "uncalibrated": {
+        "test_rmse": 1.86,
+        "test_mae": 1.4,
+        "mean_bias": 0.1,
+        "top2pct_bias": 0.21
+      },
+      "test_rmse": 1.86,
+      "test_mae": 1.39,
+      "mean_bias": 0.04,
+      "top2pct_bias": 0.13,
+      "confidence": {
+        "High": {
+          "n": 17343,
+          "share": 0.367,
+          "mae": 1.91,
+          "relative_miss": 0.42
+        },
+        "Medium": {
+          "n": 15225,
+          "share": 0.323,
+          "mae": 1.14,
+          "relative_miss": 0.603
+        },
+        "Low": {
+          "n": 14634,
+          "share": 0.31,
+          "mae": 1.02,
+          "relative_miss": 0.752
+        }
+      },
+      "rmse_improvement_pct": 4.1
+    }
+  },
+  "rebounds": {
+    "expected": {
+      "n_train": 182354,
+      "n_test": 47202,
+      "best_iter": 379,
+      "calibration": {
+        "tree_weight": 1.015,
+        "avg_weight": -0.001,
+        "intercept": -0.12
+      },
+      "baseline_rmse": 2.63,
+      "baseline_mae": 2.02,
+      "uncalibrated": {
+        "test_rmse": 2.52,
+        "test_mae": 1.93,
+        "mean_bias": 0.07,
+        "top2pct_bias": -0.07
+      },
+      "test_rmse": 2.52,
+      "test_mae": 1.93,
+      "mean_bias": 0.01,
+      "top2pct_bias": -0.02,
+      "confidence": {
+        "High": {
+          "n": 15425,
+          "share": 0.327,
+          "mae": 2.33,
+          "relative_miss": 0.357
+        },
+        "Medium": {
+          "n": 14907,
+          "share": 0.316,
+          "mae": 1.77,
+          "relative_miss": 0.447
+        },
+        "Low": {
+          "n": 16870,
+          "share": 0.357,
+          "mae": 1.69,
+          "relative_miss": 0.537
+        }
+      },
+      "rmse_improvement_pct": 4.2
+    }
+  }
+}

@@ -19,7 +19,7 @@ REGULAR_SEASON = 2
 BOX_COLS = ["game_id", "season", "season_type", "game_date", "athlete_id", "athlete_display_name",
             "athlete_position_abbreviation", "team_abbreviation", "opponent_team_abbreviation", "home_away",
             "minutes", "points", "field_goals_attempted", "three_point_field_goals_attempted", "free_throws_attempted",
-            "assists", "rebounds", "turnovers", "starter", "did_not_play", "team_score", "opponent_team_score"]
+            "assists", "rebounds", "offensive_rebounds", "defensive_rebounds", "turnovers", "starter", "did_not_play", "team_score", "opponent_team_score"]
 
 
 def _cached(url: str, name: str, refresh: bool, columns: list[str] | None = None) -> pd.DataFrame | None:
@@ -47,7 +47,7 @@ def load_box(start: int = FIRST_SEASON, end: int | None = None, refresh_current:
     """Regular-season player games in which the player got on the floor."""
     end = end or current_season()
     frames = [f for s in range(start, end + 1)
-              if (f := _cached(BOX_URL.format(season=s), f"box_{s}", refresh_current and s == end, BOX_COLS)) is not None]
+              if (f := _cached(BOX_URL.format(season=s), f"box_v2_{s}", refresh_current and s == end, BOX_COLS)) is not None]
     df = pd.concat(frames, ignore_index=True)
     df = df[(df["season_type"] == REGULAR_SEASON) & ~df["did_not_play"].fillna(False) & (df["minutes"].fillna(0) > 0)]
     # All-Star and exhibition sides (EAST, WEST, ...) are listed as regular season; real teams play 20+ games

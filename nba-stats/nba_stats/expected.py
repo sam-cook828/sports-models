@@ -1,4 +1,4 @@
-"""Expected-points model: predicts a player's mean points for a game (squared-error loss).
+"""Expected-stat model: predicts a player's mean points, assists or rebounds for a game (squared-error loss).
 
 Boosted trees shrink extreme players toward the middle (stars come out too low) and can carry a
 season-level bias. A linear calibration step corrects both: it is fit on out-of-sample
@@ -26,7 +26,7 @@ def _make(n_iter: int) -> HistGradientBoostingRegressor:
 
 
 class CalibratedRegressor:
-    """Tree model plus a linear correction: points = a * tree prediction + b * 10-game average + c.
+    """Tree model plus a linear correction: stat = a * tree prediction + b * 10-game average + c.
 
     Also carries the confidence model: expected absolute miss, its floor and the label cut points.
     """
@@ -116,7 +116,7 @@ def fit(tr, va, te, feats, target):
 
 
 def predict(model: CalibratedRegressor, df: pd.DataFrame, feats: list[str]) -> tuple[np.ndarray, np.ndarray]:
-    """Expected points and a High / Medium / Low confidence label per row."""
+    """Expected value and a High / Medium / Low confidence label per row."""
     X = df.reindex(columns=feats)
     pred = model.predict(X, df["baseline"])
     return np.clip(pred, 0, None), model.confidence(X, pred)

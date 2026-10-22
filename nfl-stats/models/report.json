@@ -1,0 +1,616 @@
+{
+  "passing_yards": {
+    "expected": {
+      "n_train": 4440,
+      "n_test": 806,
+      "best_iter": 120,
+      "calibration": {
+        "tree_weight": 0.881,
+        "avg_weight": 0.143,
+        "intercept": -11.17
+      },
+      "baseline_rmse": 88.41,
+      "baseline_mae": 69.62,
+      "uncalibrated": {
+        "test_rmse": 81.27,
+        "test_mae": 64.06,
+        "mean_bias": 7.13,
+        "top2pct_bias": 31.92
+      },
+      "test_rmse": 81.13,
+      "test_mae": 64.1,
+      "mean_bias": 0.87,
+      "top2pct_bias": 33.11,
+      "confidence": {
+        "High": {
+          "n": 204,
+          "share": 0.253,
+          "mae": 57.2,
+          "relative_miss": 0.23
+        },
+        "Medium": {
+          "n": 295,
+          "share": 0.366,
+          "mae": 60.36,
+          "relative_miss": 0.281
+        },
+        "Low": {
+          "n": 307,
+          "share": 0.381,
+          "mae": 72.29,
+          "relative_miss": 0.393
+        }
+      },
+      "rmse_improvement_pct": 8.2
+    },
+    "probabilities": {
+      "best_iter": 177,
+      "log_loss": 0.4475,
+      "base_rate_log_loss": 0.5156,
+      "brier": 0.1451,
+      "base_rate_brier": 0.1711,
+      "calibration": {
+        "(0.0, 0.1]": [
+          0.054,
+          0.032,
+          1573
+        ],
+        "(0.1, 0.2]": [
+          0.146,
+          0.118,
+          1214
+        ],
+        "(0.2, 0.3]": [
+          0.247,
+          0.226,
+          819
+        ],
+        "(0.3, 0.4]": [
+          0.348,
+          0.333,
+          651
+        ],
+        "(0.4, 0.5]": [
+          0.449,
+          0.413,
+          620
+        ],
+        "(0.5, 0.6]": [
+          0.551,
+          0.528,
+          559
+        ],
+        "(0.6, 0.7]": [
+          0.652,
+          0.623,
+          615
+        ],
+        "(0.7, 0.8]": [
+          0.752,
+          0.735,
+          690
+        ],
+        "(0.8, 0.9]": [
+          0.849,
+          0.852,
+          742
+        ],
+        "(0.9, 1.0]": [
+          0.935,
+          0.915,
+          577
+        ]
+      }
+    }
+  },
+  "rushing_yards": {
+    "expected": {
+      "n_train": 10784,
+      "n_test": 1944,
+      "best_iter": 99,
+      "calibration": {
+        "tree_weight": 0.884,
+        "avg_weight": 0.152,
+        "intercept": -1.74
+      },
+      "baseline_rmse": 29.99,
+      "baseline_mae": 22.32,
+      "uncalibrated": {
+        "test_rmse": 28.49,
+        "test_mae": 21.04,
+        "mean_bias": -0.06,
+        "top2pct_bias": 8.07
+      },
+      "test_rmse": 28.5,
+      "test_mae": 20.97,
+      "mean_bias": -0.11,
+      "top2pct_bias": 13.21,
+      "confidence": {
+        "High": {
+          "n": 638,
+          "share": 0.328,
+          "mae": 27.55,
+          "relative_miss": 0.454
+        },
+        "Medium": {
+          "n": 667,
+          "share": 0.343,
+          "mae": 18.15,
+          "relative_miss": 0.595
+        },
+        "Low": {
+          "n": 639,
+          "share": 0.329,
+          "mae": 17.33,
+          "relative_miss": 0.774
+        }
+      },
+      "rmse_improvement_pct": 5.0
+    },
+    "probabilities": {
+      "best_iter": 254,
+      "log_loss": 0.3743,
+      "base_rate_log_loss": 0.4783,
+      "brier": 0.1193,
+      "base_rate_brier": 0.1554,
+      "calibration": {
+        "(0.0, 0.1]": [
+          0.04,
+          0.035,
+          6530
+        ],
+        "(0.1, 0.2]": [
+          0.145,
+          0.152,
+          2606
+        ],
+        "(0.2, 0.3]": [
+          0.247,
+          0.247,
+          1647
+        ],
+        "(0.3, 0.4]": [
+          0.347,
+          0.332,
+          1208
+        ],
+        "(0.4, 0.5]": [
+          0.448,
+          0.438,
+          925
+        ],
+        "(0.5, 0.6]": [
+          0.548,
+          0.542,
+          762
+        ],
+        "(0.6, 0.7]": [
+          0.647,
+          0.641,
+          635
+        ],
+        "(0.7, 0.8]": [
+          0.748,
+          0.744,
+          547
+        ],
+        "(0.8, 0.9]": [
+          0.849,
+          0.873,
+          497
+        ],
+        "(0.9, 1.0]": [
+          0.925,
+          0.913,
+          195
+        ]
+      }
+    }
+  },
+  "receiving_yards": {
+    "expected": {
+      "n_train": 25752,
+      "n_test": 4262,
+      "best_iter": 101,
+      "calibration": {
+        "tree_weight": 0.88,
+        "avg_weight": 0.144,
+        "intercept": -1.51
+      },
+      "baseline_rmse": 28.75,
+      "baseline_mae": 21.8,
+      "uncalibrated": {
+        "test_rmse": 27.52,
+        "test_mae": 20.9,
+        "mean_bias": 1.15,
+        "top2pct_bias": -6.66
+      },
+      "test_rmse": 27.52,
+      "test_mae": 20.76,
+      "mean_bias": 0.58,
+      "top2pct_bias": -2.79,
+      "confidence": {
+        "High": {
+          "n": 1390,
+          "share": 0.326,
+          "mae": 27.17,
+          "relative_miss": 0.501
+        },
+        "Medium": {
+          "n": 1414,
+          "share": 0.332,
+          "mae": 18.49,
+          "relative_miss": 0.647
+        },
+        "Low": {
+          "n": 1458,
+          "share": 0.342,
+          "mae": 16.85,
+          "relative_miss": 0.776
+        }
+      },
+      "rmse_improvement_pct": 4.3
+    },
+    "probabilities": {
+      "best_iter": 255,
+      "log_loss": 0.3626,
+      "base_rate_log_loss": 0.4426,
+      "brier": 0.1146,
+      "base_rate_brier": 0.141,
+      "calibration": {
+        "(0.0, 0.1]": [
+          0.039,
+          0.036,
+          15190
+        ],
+        "(0.1, 0.2]": [
+          0.146,
+          0.137,
+          5895
+        ],
+        "(0.2, 0.3]": [
+          0.247,
+          0.231,
+          3861
+        ],
+        "(0.3, 0.4]": [
+          0.348,
+          0.33,
+          2743
+        ],
+        "(0.4, 0.5]": [
+          0.448,
+          0.423,
+          1996
+        ],
+        "(0.5, 0.6]": [
+          0.548,
+          0.521,
+          1599
+        ],
+        "(0.6, 0.7]": [
+          0.649,
+          0.652,
+          1246
+        ],
+        "(0.7, 0.8]": [
+          0.746,
+          0.749,
+          817
+        ],
+        "(0.8, 0.9]": [
+          0.843,
+          0.865,
+          620
+        ],
+        "(0.9, 1.0]": [
+          0.917,
+          0.899,
+          129
+        ]
+      }
+    }
+  },
+  "receptions": {
+    "expected": {
+      "n_train": 25752,
+      "n_test": 4262,
+      "best_iter": 152,
+      "calibration": {
+        "tree_weight": 0.81,
+        "avg_weight": 0.198,
+        "intercept": -0.05
+      },
+      "baseline_rmse": 2.06,
+      "baseline_mae": 1.61,
+      "uncalibrated": {
+        "test_rmse": 1.98,
+        "test_mae": 1.53,
+        "mean_bias": 0.06,
+        "top2pct_bias": -0.57
+      },
+      "test_rmse": 1.98,
+      "test_mae": 1.54,
+      "mean_bias": 0.06,
+      "top2pct_bias": -0.27,
+      "confidence": {
+        "High": {
+          "n": 1451,
+          "share": 0.34,
+          "mae": 1.88,
+          "relative_miss": 0.428
+        },
+        "Medium": {
+          "n": 1431,
+          "share": 0.336,
+          "mae": 1.44,
+          "relative_miss": 0.534
+        },
+        "Low": {
+          "n": 1380,
+          "share": 0.324,
+          "mae": 1.28,
+          "relative_miss": 0.607
+        }
+      },
+      "rmse_improvement_pct": 3.9
+    },
+    "probabilities": {
+      "best_iter": 211,
+      "log_loss": 0.4,
+      "base_rate_log_loss": 0.4846,
+      "brier": 0.1287,
+      "base_rate_brier": 0.1591,
+      "calibration": {
+        "(0.0, 0.1]": [
+          0.04,
+          0.036,
+          10486
+        ],
+        "(0.1, 0.2]": [
+          0.145,
+          0.138,
+          4466
+        ],
+        "(0.2, 0.3]": [
+          0.248,
+          0.241,
+          3017
+        ],
+        "(0.3, 0.4]": [
+          0.349,
+          0.346,
+          2288
+        ],
+        "(0.4, 0.5]": [
+          0.448,
+          0.421,
+          2112
+        ],
+        "(0.5, 0.6]": [
+          0.549,
+          0.544,
+          1862
+        ],
+        "(0.6, 0.7]": [
+          0.649,
+          0.632,
+          1664
+        ],
+        "(0.7, 0.8]": [
+          0.751,
+          0.741,
+          1643
+        ],
+        "(0.8, 0.9]": [
+          0.849,
+          0.857,
+          1557
+        ],
+        "(0.9, 1.0]": [
+          0.933,
+          0.951,
+          739
+        ]
+      }
+    }
+  },
+  "anytime_tds": {
+    "expected": {
+      "n_train": 27972,
+      "n_test": 4813,
+      "best_iter": 84,
+      "calibration": {
+        "tree_weight": 0.948,
+        "avg_weight": 0.101,
+        "intercept": -0.02
+      },
+      "baseline_rmse": 0.6,
+      "baseline_mae": 0.43,
+      "uncalibrated": {
+        "test_rmse": 0.56,
+        "test_mae": 0.42,
+        "mean_bias": -0.01,
+        "top2pct_bias": -0.09
+      },
+      "test_rmse": 0.56,
+      "test_mae": 0.42,
+      "mean_bias": -0.01,
+      "top2pct_bias": -0.01,
+      "confidence": {
+        "High": {
+          "n": 1747,
+          "share": 0.363,
+          "mae": 0.49,
+          "relative_miss": 1.168
+        },
+        "Medium": {
+          "n": 1533,
+          "share": 0.319,
+          "mae": 0.41,
+          "relative_miss": 1.48
+        },
+        "Low": {
+          "n": 1533,
+          "share": 0.319,
+          "mae": 0.36,
+          "relative_miss": 1.673
+        }
+      },
+      "rmse_improvement_pct": 6.7
+    },
+    "probabilities": {
+      "best_iter": 123,
+      "log_loss": 0.3583,
+      "base_rate_log_loss": 0.3862,
+      "brier": 0.1115,
+      "base_rate_brier": 0.1198,
+      "calibration": {
+        "(0.0, 0.1]": [
+          0.038,
+          0.039,
+          4567
+        ],
+        "(0.1, 0.2]": [
+          0.152,
+          0.163,
+          2248
+        ],
+        "(0.2, 0.3]": [
+          0.243,
+          0.262,
+          1417
+        ],
+        "(0.3, 0.4]": [
+          0.345,
+          0.361,
+          779
+        ],
+        "(0.4, 0.5]": [
+          0.441,
+          0.394,
+          383
+        ],
+        "(0.5, 0.6]": [
+          0.548,
+          0.545,
+          167
+        ],
+        "(0.6, 0.7]": [
+          0.632,
+          0.61,
+          59
+        ],
+        "(0.7, 0.8]": [
+          0.74,
+          1.0,
+          6
+        ]
+      }
+    }
+  },
+  "passing_tds": {
+    "expected": {
+      "n_train": 4440,
+      "n_test": 806,
+      "best_iter": 63,
+      "calibration": {
+        "tree_weight": 0.84,
+        "avg_weight": 0.228,
+        "intercept": -0.13
+      },
+      "baseline_rmse": 1.15,
+      "baseline_mae": 0.94,
+      "uncalibrated": {
+        "test_rmse": 1.09,
+        "test_mae": 0.89,
+        "mean_bias": -0.02,
+        "top2pct_bias": -0.17
+      },
+      "test_rmse": 1.09,
+      "test_mae": 0.89,
+      "mean_bias": -0.05,
+      "top2pct_bias": 0.06,
+      "confidence": {
+        "High": {
+          "n": 238,
+          "share": 0.295,
+          "mae": 0.99,
+          "relative_miss": 0.565
+        },
+        "Medium": {
+          "n": 310,
+          "share": 0.385,
+          "mae": 0.89,
+          "relative_miss": 0.697
+        },
+        "Low": {
+          "n": 258,
+          "share": 0.32,
+          "mae": 0.79,
+          "relative_miss": 0.767
+        }
+      },
+      "rmse_improvement_pct": 5.2
+    },
+    "probabilities": {
+      "best_iter": 86,
+      "log_loss": 0.4473,
+      "base_rate_log_loss": 0.4815,
+      "brier": 0.1459,
+      "base_rate_brier": 0.1584,
+      "calibration": {
+        "(0.0, 0.1]": [
+          0.052,
+          0.04,
+          944
+        ],
+        "(0.1, 0.2]": [
+          0.142,
+          0.171,
+          491
+        ],
+        "(0.2, 0.3]": [
+          0.248,
+          0.217,
+          323
+        ],
+        "(0.3, 0.4]": [
+          0.347,
+          0.365,
+          293
+        ],
+        "(0.4, 0.5]": [
+          0.45,
+          0.458,
+          227
+        ],
+        "(0.5, 0.6]": [
+          0.551,
+          0.532,
+          233
+        ],
+        "(0.6, 0.7]": [
+          0.651,
+          0.653,
+          248
+        ],
+        "(0.7, 0.8]": [
+          0.755,
+          0.737,
+          236
+        ],
+        "(0.8, 0.9]": [
+          0.837,
+          0.871,
+          225
+        ],
+        "(0.9, 1.0]": [
+          0.911,
+          1.0,
+          4
+        ]
+      }
+    }
+  }
+}

@@ -1,12 +1,14 @@
-# nba-points
+# nba-stats
 
-Predict NBA players' points per game, with a High / Medium / Low confidence label on each prediction.
+Predict NBA players' points, assists and rebounds per game, with a High / Medium / Low confidence label on each
+prediction. Each stat has its own model; all three share one feature table.
 
 ```
 uv sync
-uv run python -m nba_points.train     # downloads data, trains, writes models/report.json
-uv run python -m nba_points.predict   # the next date with unplayed games
-uv run python -m nba_points.predict --date 2026-10-24 --team BOS
+uv run python -m nba_stats.train                    # downloads data, trains all three, writes models/report.json
+uv run python -m nba_stats.train --target assists   # retrain one stat
+uv run python -m nba_stats.predict                  # the next date with unplayed games
+uv run python -m nba_stats.predict --date 2026-10-24 --team BOS --sort reb
 ```
 
 ## Data
@@ -27,27 +29,30 @@ Only players averaging at least 10 minutes over their previous 10 games are mode
 All features use only games before the one being predicted.
 
 - **Player form:** 5-game, 10-game, season-to-date and career averages of points, minutes, field-goal,
-  three-point and free-throw attempts, assists, rebounds, turnovers, starts, and share of team shot attempts;
-  points per minute (5-game, 10-game, season) and last game's minutes.
-- **Missing teammates and opponents:** for each game, the recent minutes, shot share and points of rotation
+  three-point and free-throw attempts, assists, rebounds (total, offensive, defensive), turnovers, starts, and
+  share of team shot attempts; points, assists and rebounds per minute (5-game, 10-game, season) and last game's
+  minutes.
+- **Missing teammates and opponents:** for each game, the recent minutes, shot share, points, assists and rebounds of rotation
   players who sat out (anyone who played for the team in its previous 10 games this season and was averaging
   10+ minutes). Box scores show who actually played, so this works for every past game; traded players are not
   counted as absent. In `predict`, players listed Out on the injury report are the absences.
-- **Consistency and schedule:** last game's points, 10-game standard deviation, games played, rest days,
-  back-to-backs, home/away.
-- **Opponent:** the defense's last-10-game points allowed, its games' combined scoring (a pace proxy), and points
-  allowed to the player's position group (guards, forwards, centers).
+- **Consistency and schedule:** last game's value of the stat being predicted and its 10-game standard deviation,
+  games played, rest days, back-to-backs, home/away.
+- **Opponent:** the defense's last-10-game points allowed, its games' combined scoring (a pace proxy), and the
+  points, assists or rebounds it allows overall and to the player's position group (guards, forwards, centers).
 
-The model is a scikit-learn `HistGradientBoostingRegressor` predicting mean points, with the same
-calibration and confidence-label method as `nfl-yards` (see its README). Seasons before 2023-24 train,
-2023-24 tunes the number of boosting rounds, and 2024-25 onward is the held-out test set.
+Each model is a scikit-learn `HistGradientBoostingRegressor` predicting the stat's mean, with the same
+calibration and confidence-label method as `nfl-stats` (see its README). Seasons before 2023-24 train,
+2023-24 tunes the number of boosting rounds, and 2024-25 onward is the held-out test set (47,202 player-games).
 
-| Test set (47,202 player-games) | Model | 10-game average |
-|---|---|---|
-| RMSE (points) | 6.07 | 6.36 |
-| Mean absolute error | 4.69 | 4.92 |
+| Stat | RMSE model | RMSE 10-game avg | MAE model | MAE 10-game avg |
+|---|---|---|---|---|
+| Points | 6.06 | 6.36 | 4.69 | 4.92 |
+| Assists | 1.86 | 1.94 | 1.39 | 1.45 |
+| Rebounds | 2.52 | 2.63 | 1.93 | 2.02 |
 
-Average miss as a share of the projection, by confidence label: High 31%, Medium 44%, Low 55%.
+Average miss as a share of the projection, by confidence label (High / Medium / Low): points 31% / 44% / 55%,
+assists 42% / 60% / 75%, rebounds 36% / 45% / 54%.
 
 All-Star games are listed as regular season in the source data and are removed. Feature groups were tested one at a
 time on the held-out games; absences gave the biggest gain (RMSE 6.15 to 6.07), and two groups that didn't help

@@ -17,11 +17,17 @@ THRESHOLDS = {
     "passing_yards": [125, 150, 175, 200, 225, 250, 275, 300, 325, 350],
     "rushing_yards": [25, 40, 50, 60, 70, 80, 90, 100],
     "receiving_yards": [25, 40, 50, 60, 70, 80, 90, 100],
+    "receptions": [2, 3, 4, 5, 6, 7, 8],
+    "anytime_tds": [1, 2],
+    "passing_tds": [1, 2, 3, 4],
 }
 GRID = {
     "passing_yards": list(range(100, 401, 25)),
     "rushing_yards": list(range(5, 151, 5)),
     "receiving_yards": list(range(5, 151, 5)),
+    "receptions": list(range(1, 13)),
+    "anytime_tds": [1, 2, 3],
+    "passing_tds": [1, 2, 3, 4, 5],
 }
 
 

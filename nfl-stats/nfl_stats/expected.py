@@ -1,4 +1,4 @@
-"""Expected-yards model: predicts a player's mean yardage for a game (squared-error loss).
+"""Expected-value model: predicts a player's mean yards, receptions or touchdowns for a game (squared-error loss).
 
 Boosted trees shrink extreme players toward the middle (elite receivers come out too low) and can carry a
 season-level bias (passing ran high). A linear calibration step corrects both: it is fit on out-of-sample
@@ -26,7 +26,7 @@ def _make(n_iter: int) -> HistGradientBoostingRegressor:
 
 
 class CalibratedRegressor:
-    """Tree model plus a linear correction: yards = a * tree prediction + b * 8-game average + c.
+    """Tree model plus a linear correction: stat = a * tree prediction + b * 8-game average + c.
 
     Also carries the confidence model: expected absolute miss, its floor and the label cut points.
     """
@@ -116,7 +116,7 @@ def fit(tr, va, te, feats, target):
 
 
 def predict(model: CalibratedRegressor, df: pd.DataFrame, feats: list[str]) -> tuple[np.ndarray, np.ndarray]:
-    """Expected yards and a High / Medium / Low confidence label per row."""
+    """Expected value and a High / Medium / Low confidence label per row."""
     X = df.reindex(columns=feats)
     pred = model.predict(X, df["baseline"])
     return np.clip(pred, 0, None), model.confidence(X, pred)

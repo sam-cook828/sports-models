@@ -5,14 +5,14 @@ environment, data cache and models.
 
 | Project | Predicts | Data |
 |---|---|---|
-| [`nfl-yards/`](nfl-yards/) | Weekly passing, rushing and receiving yards, with threshold probabilities | nflverse |
-| [`nba-points/`](nba-points/) | Points per game | ESPN via sportsdataverse |
+| [`nfl-stats/`](nfl-stats/) | Passing, rushing and receiving yards; receptions; anytime and passing touchdowns. Expected values, confidence labels and threshold probabilities | nflverse |
+| [`nba-stats/`](nba-stats/) | Points, assists and rebounds per game, with confidence labels | ESPN via sportsdataverse |
 
 ```
-cd nfl-yards   # or nba-points
+cd nfl-stats   # or nba-stats
 uv sync
-uv run python -m nfl_yards.train     # nba_points.train
-uv run python -m nfl_yards.predict   # nba_points.predict
+uv run python -m nfl_stats.train     # nba_stats.train
+uv run python -m nfl_stats.predict   # nba_stats.predict
 ```
 
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).

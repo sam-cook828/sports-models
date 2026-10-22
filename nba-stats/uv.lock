@@ -190,7 +190,7 @@ wheels = [
 ]
 
 [[package]]
-name = "nba-points"
+name = "nba-stats"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

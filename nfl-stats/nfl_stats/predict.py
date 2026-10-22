@@ -48,7 +48,7 @@ def placeholders(raw: pd.DataFrame, games: pd.DataFrame, season: int, week: int)
 
 
 def predict(season: int | None = None, week: int | None = None, model: str = "all") -> pd.DataFrame:
-    """Run the expected-yards model, the threshold-probability model, or both ("all")."""
+    """Run the expected-value model, the threshold-probability model, or both ("all")."""
     games, season, week = next_week(season, week)
     raw = load_all(refresh=True)
     full = pd.concat([raw, placeholders(raw, games, season, week)], ignore_index=True)
@@ -61,13 +61,13 @@ def predict(season: int | None = None, week: int | None = None, model: str = "al
         df = df[df["inj_status"] < injuries.STATUS["Out"]]  # ruled out: not playing
         df["status"] = df["inj_status"].map({1: "Questionable", 2: "Doubtful"}).fillna("")
         cols = ["player_display_name", "position", "team", "opponent_team", "status", "stat", "recent_avg"]
-        df["recent_avg"] = df["baseline"].round(1)
-        df["stat"] = target.replace("_yards", "")
+        df["recent_avg"] = df["baseline"].round(2 if target.endswith("_tds") else 1)
+        df["stat"] = target
         if model in ("expected", "all"):
             bundle = joblib.load(MODELS_DIR / f"{target}_expected.joblib")
             exp, conf = expected.predict(bundle["model"], _align(df, bundle["features"]), bundle["features"])
-            df["exp_yards"], df["confidence"] = exp.round(1), conf
-            cols[5:5] = ["exp_yards", "confidence"]
+            df["expected"], df["confidence"] = exp.round(2 if target.endswith("_tds") else 1), conf
+            cols[5:5] = ["expected", "confidence"]
         if model in ("probs", "all"):
             bundle = joblib.load(MODELS_DIR / f"{target}_probs.joblib")
             p = probs.predict(bundle["model"], _align(df, bundle["features"]), bundle["features"], target)
@@ -86,20 +86,20 @@ def _align(df: pd.DataFrame, feats: list[str]) -> pd.DataFrame:
 
 
 def sort_col(df: pd.DataFrame) -> str:
-    """Sort by expected yards, or by the lowest threshold's probability when only probabilities were run."""
-    return "exp_yards" if "exp_yards" in df else next(c for c in df if c.startswith("p_") and df[c].notna().any())
+    """Sort by expected value, or by the lowest threshold's probability when only probabilities were run."""
+    return "expected" if "expected" in df else next(c for c in df if c.startswith("p_") and df[c].notna().any())
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--season", type=int)
     ap.add_argument("--week", type=int)
-    ap.add_argument("--stat", choices=[t.replace("_yards", "") for t in TARGETS], help="only this yard type")
+    ap.add_argument("--stat", choices=list(TARGETS), help="only this stat")
     ap.add_argument("--player", help="case-insensitive name substring filter")
     ap.add_argument("--team", help="team abbreviation filter, e.g. KC")
     ap.add_argument("--top", type=int, default=15, help="rows per stat (default 15)")
     ap.add_argument("--model", choices=["expected", "probs", "all"], default="all",
-                    help="expected yards, threshold probabilities, or both (default)")
+                    help="expected value, threshold probabilities, or both (default)")
     ap.add_argument("--csv", help="write all predictions to this path")
     args = ap.parse_args()
 
@@ -114,11 +114,14 @@ def main() -> None:
         res = res[(res["team"] == args.team.upper()) | (res["opp"] == args.team.upper())]
     print(f"Predictions for {res.attrs.get('label', '')}")
     for stat, g in res.groupby("stat", sort=False):
-        print(f"\n== {stat} yards ==")
+        print(f"\n== {stat.replace('_', ' ')} ==")
         g = g.sort_values(sort_col(g), ascending=False).head(args.top).drop(columns="stat").dropna(axis=1, how="all")
+        # thresholds in numeric order (stats with different thresholds share one table upstream)
+        thr = sorted((c for c in g if c.startswith("p_") and c[2:].isdigit()), key=lambda c: int(c[2:]))
+        g = g[[c for c in g if c not in thr] + thr]
         pcols = [c for c in g if c.startswith("p_")]
-        g[pcols] = g[pcols].apply(lambda col: (col * 100).round().astype(int).astype(str) + "%")
-        g = g.rename(columns={c: c.replace("p_", "") + "+" for c in pcols})
+        g[pcols] = g[pcols].apply(lambda col: col.map(lambda v: "" if pd.isna(v) else f"{v:.0%}"))
+        g = g.rename(columns={c: c.replace("p_", "") + "+" for c in pcols if c[2:].isdigit()})
         print(g.to_string(index=False))
 
 

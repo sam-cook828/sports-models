@@ -1,4 +1,4 @@
-"""Train the two models for each yard type: expected yards and threshold probabilities.
+"""Train the two models for each stat: expected value and threshold probabilities.
 
 Each is independent: it has its own module, saved file (models/<target>_expected.joblib and
 models/<target>_probs.joblib) and section in models/report.json.
@@ -21,7 +21,7 @@ def main() -> None:
     ap.add_argument("--val-season", type=int, default=2024, help="tuning season; later seasons are the test set")
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--model", choices=["expected", "probs", "all"], default="all", help="which model to train")
-    ap.add_argument("--target", choices=list(TARGETS), help="only this yard type (default: all)")
+    ap.add_argument("--target", choices=list(TARGETS), help="only this stat (default: all)")
     args = ap.parse_args()
 
     raw = load_all(refresh=args.refresh)
@@ -40,7 +40,7 @@ def main() -> None:
                 continue
             model, metrics = module.fit(tr, va, te, feats, target)
             joblib.dump({"model": model, "features": feats}, MODELS_DIR / f"{target}_{name}.joblib")
-            section["expected_yards" if name == "expected" else "probabilities"] = metrics
+            section["expected" if name == "expected" else "probabilities"] = metrics
             print(target, name, {k: v for k, v in metrics.items() if k != "calibration"})
 
     report_path.write_text(json.dumps(report, indent=2))

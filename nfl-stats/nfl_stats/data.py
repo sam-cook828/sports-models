@@ -86,6 +86,9 @@ def load_all(start: int = 2016, end: int = 2026, refresh: bool = False) -> pd.Da
     df = df[df["season_type"] == "REG"].sort_values(["season", "week"]).reset_index(drop=True)
     snaps = load_snaps(start, end, refresh)[["player_id", "season", "week", "offense_pct"]]
     df = df.merge(snaps, on=["player_id", "season", "week"], how="left")
+    df = df.copy()  # defragment after the merges
     df["carry_share"] = df["carries"] / df.groupby(["season", "week", "team"])["carries"].transform("sum")
+    df["anytime_tds"] = df["rushing_tds"].fillna(0) + df["receiving_tds"].fillna(0)
+    df["touches"] = df["carries"].fillna(0) + df["targets"].fillna(0)
     df = df.merge(vegas_lines(load_schedule(refresh)), on=["season", "week", "team"], how="left")
     return df

@@ -190,7 +190,7 @@ wheels = [
 ]
 
 [[package]]
-name = "nfl-yards"
+name = "nfl-stats"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

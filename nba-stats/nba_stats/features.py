@@ -1,18 +1,17 @@
-"""Leak-free features: every feature uses only games before the one being predicted."""
+"""Leak-free features: every feature uses only games before the one being predicted.
+
+One feature table serves all three stats (points, assists, rebounds); `feature_cols(target)` picks the
+columns each model uses.
+"""
 import numpy as np
 import pandas as pd
 
-TARGET = "points"
+TARGETS = ["points", "assists", "rebounds"]
 STATS = ["points", "minutes", "field_goals_attempted", "three_point_field_goals_attempted",
-         "free_throws_attempted", "assists", "rebounds", "turnovers", "starter", "fga_share"]
+         "free_throws_attempted", "assists", "rebounds", "offensive_rebounds", "defensive_rebounds",
+         "turnovers", "starter", "fga_share"]
 WINDOWS = (5, 10)
-VAC = ["vac_minutes", "vac_fga_share", "vac_points", "vac_players"]
-# Feature groups beyond the base set. Tested one at a time on held-out games: scoring rate and absences help;
-# games just missed and team scoring didn't, so they were removed.
-GROUPS = {
-    "rate": ["pts_per_min_r5", "pts_per_min_r10", "pts_per_min_season", "last_game_minutes"],
-    "absences": VAC + [f"opp_{c}" for c in VAC],
-}
+VAC = ["vac_minutes", "vac_fga_share", "vac_points", "vac_assists", "vac_rebounds", "vac_players"]
 MIN_AVG_MINUTES = 10  # prior 10-game average needed to be modeled
 
 
@@ -23,38 +22,39 @@ def _lagged(g, col: str, w: int | None) -> pd.Series:
 
 
 def _opponent(df: pd.DataFrame) -> pd.DataFrame:
-    """Each defense's recent points allowed: overall, and to guards / forwards / centers."""
-    games = df.groupby(["game_id", "game_date", "opponent_team_abbreviation"], as_index=False)["opponent_team_score"].first()
-    # opponent_team_score here is the points the *player's* team allowed; flip to the defense's view
-    allowed = df.groupby(["game_id", "game_date", "opponent_team_abbreviation"], as_index=False)["team_score"].first()
-    allowed = allowed.rename(columns={"opponent_team_abbreviation": "defense", "team_score": "pts_allowed"})
-    allowed = allowed.merge(games.rename(columns={"opponent_team_abbreviation": "defense", "opponent_team_score": "pts_scored"}),
-                            on=["game_id", "game_date", "defense"])
-    by_pos = (df[df["pos_group"] != ""].pivot_table(index=["game_id", "opponent_team_abbreviation"], columns="pos_group",
-                                                     values="points", aggfunc="sum")
-              .add_prefix("allowed_").reset_index().rename(columns={"opponent_team_abbreviation": "defense"}))
-    t = allowed.merge(by_pos, on=["game_id", "defense"], how="left").sort_values(["defense", "game_date"])
+    """Each defense's last-10-game totals allowed (points, assists, rebounds), overall and by position group."""
+    # a row's opponent is the defense; its team_score is what that defense allowed, opponent_team_score what it scored
+    t = (df.groupby(["game_id", "game_date", "opponent_team_abbreviation"], as_index=False)
+         .agg(pts_allowed=("team_score", "first"), pts_scored=("opponent_team_score", "first"))
+         .rename(columns={"opponent_team_abbreviation": "defense"}))
     t["game_total"] = t["pts_allowed"] + t["pts_scored"]
+    for stat in TARGETS:
+        tot = df.groupby(["game_id", "opponent_team_abbreviation"])[stat].sum(min_count=1).rename(f"{stat}_allowed")
+        by_pos = (df[df["pos_group"] != ""].pivot_table(index=["game_id", "opponent_team_abbreviation"],
+                                                         columns="pos_group", values=stat, aggfunc="sum")
+                  .add_prefix(f"{stat}_allowed_"))
+        both = pd.concat([tot, by_pos], axis=1).reset_index().rename(columns={"opponent_team_abbreviation": "defense"})
+        t = t.merge(both, on=["game_id", "defense"], how="left")
+    t = t.sort_values(["defense", "game_date"])
     g = t.groupby("defense")
     out = t[["game_id", "defense"]].copy()
-    for c in ["pts_allowed", "game_total", "allowed_G", "allowed_F", "allowed_C"]:
-        if c in t:
-            out[f"opp_{c}_10"] = g[c].transform(lambda s: s.shift(1).rolling(10, min_periods=1).mean())
+    for c in t.columns.drop(["game_id", "game_date", "defense", "pts_scored"]):
+        out[f"opp_{c}_10"] = g[c].transform(lambda s: s.shift(1).rolling(10, min_periods=1).mean())
     return out.rename(columns={"defense": "opponent_team_abbreviation"})
 
 
 def _absences(df: pd.DataFrame) -> pd.DataFrame:
-    """Per team-game: the recent minutes, shot share and points of rotation players who did not play.
+    """Per team-game: the recent minutes, shot share, points, assists and rebounds of rotation players who sat.
 
     A rotation player is anyone who appeared for the team in its previous 10 games of the same season and was
-    averaging 10+ minutes.
-    Players who have since appeared for another team (traded, released) are not counted as absent.
-    For upcoming games, players left out of the placeholders (listed Out) count as absent.
+    averaging 10+ minutes. Players who have since appeared for another team (traded, released) are not counted
+    as absent. For upcoming games, players left out of the placeholders (listed Out) count as absent.
     """
-    app = df[["athlete_id", "team_abbreviation", "game_id", "game_date", "season", "minutes", "fga_share", "points"]].copy()
+    keep = ["minutes", "fga_share", "points", "assists", "rebounds"]
+    app = df[["athlete_id", "team_abbreviation", "game_id", "game_date", "season", *keep]].copy()
     app = app.sort_values(["athlete_id", "game_date"])
     ga = app.groupby("athlete_id")
-    for c in ("minutes", "fga_share", "points"):  # form as of the end of each game played
+    for c in keep:  # form as of the end of each game played
         app[f"{c}_now"] = ga[c].transform(lambda s: s.rolling(10, min_periods=1).mean())
     app["next_team"], app["next_date"] = ga["team_abbreviation"].shift(-1), ga["game_date"].shift(-1)
 
@@ -64,8 +64,9 @@ def _absences(df: pd.DataFrame) -> pd.DataFrame:
     app = app.merge(tg[["team_abbreviation", "game_id", "k"]], on=["team_abbreviation", "game_id"])
 
     # each appearance makes the player a candidate for the team's next 10 games
-    cand = app.loc[app["minutes_now"] >= 10, ["athlete_id", "team_abbreviation", "k", "game_date", "season", "next_team",
-                                              "next_date", "minutes_now", "fga_share_now", "points_now"]]
+    now = [f"{c}_now" for c in keep]
+    cand = app.loc[app["minutes_now"] >= 10, ["athlete_id", "team_abbreviation", "k", "game_date", "season",
+                                              "next_team", "next_date", *now]]
     cand = cand.loc[cand.index.repeat(10)].copy()
     cand["k"] = cand["k"] + np.tile(np.arange(1, 11), len(cand) // 10)
     cand = cand.sort_values("game_date").drop_duplicates(["athlete_id", "team_abbreviation", "k"], keep="last")
@@ -77,8 +78,7 @@ def _absences(df: pd.DataFrame) -> pd.DataFrame:
              & (cand["next_date"] <= cand["date_k"]))
     absent = cand[cand["played"].isna() & ~moved]
     out = absent.groupby(["team_abbreviation", "game_id"]).agg(
-        vac_minutes=("minutes_now", "sum"), vac_fga_share=("fga_share_now", "sum"),
-        vac_points=("points_now", "sum"), vac_players=("athlete_id", "size")).reset_index()
+        **{f"vac_{c}": (f"{c}_now", "sum") for c in keep}, vac_players=("athlete_id", "size")).reset_index()
     return out
 
 
@@ -95,39 +95,42 @@ def build(df: pd.DataFrame) -> pd.DataFrame:
             cols[f"{c}_r{w}"] = _lagged(g, c, w)
         cols[f"{c}_season"] = _lagged(gs, c, None)
         cols[f"{c}_career"] = _lagged(g, c, None)
+    for t in TARGETS:
+        cols[f"last_game_{t}"] = g[t].shift(1)
+        cols[f"{t}_std_10"] = g[t].transform(lambda s: s.shift(1).rolling(10, min_periods=2).std())
     cols["games_prior"] = g.cumcount()
     cols["season_games_prior"] = gs.cumcount()
-    cols["last_game_points"] = g[TARGET].shift(1)
     cols["last_game_minutes"] = g["minutes"].shift(1)
-    cols["points_std_10"] = g[TARGET].transform(lambda s: s.shift(1).rolling(10, min_periods=2).std())
     rest = g["game_date"].diff().dt.days
     cols["rest_days"] = rest.clip(upper=10)
     cols["back_to_back"] = (rest == 1).astype(float)
     df = pd.concat([df, pd.DataFrame(cols, index=df.index)], axis=1)
-    for s in ("r5", "r10", "season"):  # scoring rate, separate from playing time
-        df[f"pts_per_min_{s}"] = df[f"points_{s}"] / df[f"minutes_{s}"].replace(0, np.nan)
+    for t in TARGETS:  # production rate, separate from playing time
+        for s in ("r5", "r10", "season"):
+            df[f"{t}_per_min_{s}"] = df[f"{t}_{s}"] / df[f"minutes_{s}"].replace(0, np.nan)
 
     # teammates and opponents missing tonight
     vac = _absences(df)
     df = df.merge(vac, on=["team_abbreviation", "game_id"], how="left")
-    opp_vac = vac.rename(columns={"team_abbreviation": "opponent_team_abbreviation",
-                                  **{c: f"opp_{c}" for c in VAC}})
+    opp_vac = vac.rename(columns={"team_abbreviation": "opponent_team_abbreviation", **{c: f"opp_{c}" for c in VAC}})
     df = df.merge(opp_vac, on=["opponent_team_abbreviation", "game_id"], how="left")
     df[VAC + [f"opp_{c}" for c in VAC]] = df[VAC + [f"opp_{c}" for c in VAC]].fillna(0)
 
     opp = _opponent(df)  # upcoming games are included so their rows get the latest defensive form
     df = df.merge(opp, on=["game_id", "opponent_team_abbreviation"], how="left")
-    pos_cols = {"G": "opp_allowed_G_10", "F": "opp_allowed_F_10", "C": "opp_allowed_C_10"}
-    df["opp_allowed_pos_10"] = [row.get(pos_cols.get(p, ""), np.nan) for p, row in
-                                zip(df["pos_group"], df[list(pos_cols.values())].to_dict("records"))]
+    for t in TARGETS:  # what this defense allows to the player's position group
+        df[f"opp_{t}_allowed_pos_10"] = np.select(
+            [df["pos_group"] == p for p in ("G", "F", "C")],
+            [df.get(f"opp_{t}_allowed_{p}_10", np.nan) for p in ("G", "F", "C")], default=np.nan)
     for p in ("G", "F", "C"):
         df[f"pos_{p}"] = (df["pos_group"] == p).astype(float)
-    df["baseline"] = df["points_r10"]
     return df[df["minutes_r10"] >= MIN_AVG_MINUTES].dropna(subset=["points_r10"])
 
 
-def feature_cols(groups: tuple[str, ...] = tuple(GROUPS)) -> list[str]:
+def feature_cols(target: str) -> list[str]:
     base = [f"{c}_{s}" for c in STATS for s in ("r5", "r10", "season", "career")]
-    return base + ["games_prior", "season_games_prior", "last_game_points", "points_std_10", "rest_days",
-                   "back_to_back", "home", "opp_pts_allowed_10", "opp_game_total_10", "opp_allowed_pos_10",
-                   "pos_G", "pos_F", "pos_C"] + [c for g in groups for c in GROUPS[g]]
+    rates = [f"{t}_per_min_{s}" for t in TARGETS for s in ("r5", "r10", "season")]
+    return (base + rates + VAC + [f"opp_{c}" for c in VAC]
+            + [f"last_game_{target}", f"{target}_std_10", "last_game_minutes", "games_prior", "season_games_prior",
+               "rest_days", "back_to_back", "home", "opp_pts_allowed_10", "opp_game_total_10",
+               f"opp_{target}_allowed_10", f"opp_{target}_allowed_pos_10", "pos_G", "pos_F", "pos_C"])
